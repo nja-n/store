@@ -1,52 +1,55 @@
-// package com.aeither.store.services;
+package com.aeither.store.services;
 
-// import java.util.List;
+import java.util.List;
+import java.util.Optional;
 
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-// import com.aeither.store.entities.User;
-// import com.aeither.store.entities.repo.UserRepo;
-// import com.aeither.store.settings.JwtUtil;
+import com.aeither.store.administration.domain.model.User;
+import com.aeither.store.administration.domain.model.Role;
+import com.aeither.store.administration.domain.repository.UserDomainRepository;
+import com.aeither.store.settings.JwtUtil;
 
-// @Service
-// public class AuthService {
+@Service
+public class AuthService {
 
-//     @Autowired
-//     UserRepo userRepo;
-//     @Autowired
-//     JwtUtil jwtUtil;
+    @Autowired
+    private UserDomainRepository userRepo;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-//     public String login(String username, String password) {
-//         if ("admin".equals(username) && "password".equals(password)) {
-//             return jwtUtil.generateToken(username);
-//         } else {
-//             User user = userRepo.findByUsernameAndPassword(username, password);
-//             if (user != null) {
-//                 return jwtUtil.generateToken(username);
-//             } else {
-//                 user = new User();
-//                 user.setUsername(username);
-//                 user.setPassword(password);
-//                 user = userRepo.save(user);
-//                 return jwtUtil.generateToken(username);
-//             }
-//         }
+    public String login(String username, String password) {
+        Optional<User> userOpt = userRepo.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.getPassword().equals(password)) {
+                return jwtUtil.generateToken(username);
+            } else {
+                return "Invalid Credentials";
+            }
+        } else {
+            // Auto-signup logic for convenience (can be removed for strict setup)
+            User user = new User();
+            user.setUsername(username);
+            user.setPassword(password);
+            user.setRole(Role.STORE_USER);
+            user.setStatus("ACTIVE");
+            user = userRepo.save(user);
+            return jwtUtil.generateToken(username);
+        }
+    }
 
-//     }
+    public List<String> userinfo() {
+        List<User> users = userRepo.findAll();
+        List<String> usernames = users.stream()
+                .map(User::getUsername)
+                .toList();
 
-//     public List<String> userinfo() {
-//         List<User> users = userRepo.findAll();
-//         List<String> usernames = users.stream()
-//                 .map(User::getUsername)
-//                 .toList();
+        return usernames;
+    }
 
-//         return usernames;
-//     }
-
-//     public void logout(Long userId) {
-//         // No action needed for JWT logout    
-//     }
-    
-
-// }
+    public void logout(Long userId) {
+        // No action needed for JWT logout
+    }
+}
