@@ -52,6 +52,22 @@ public class StockService {
         throw new IllegalStateException("Only users associated with a company can manage stocks.");
     }
 
+    public void deductStock(com.aeither.store.administration.domain.model.Company company,
+            com.aeither.store.assests.domain.model.Asset asset, Integer quantity) {
+        Stock stock = stockRepository.findByCompanyAndAsset(company, asset)
+                .orElseThrow(() -> new RuntimeException("Stock not found for asset: " + asset.getName()));
+
+        if (stock.getQuantity() < quantity) {
+            throw new RuntimeException("Insufficient stock for asset: " + asset.getName());
+        }
+
+        stock.setQuantity(stock.getQuantity() - quantity);
+        if (stock.getQuantity() == 0) {
+            stock.setStatus("OUT_OF_STOCK");
+        }
+        stockRepository.save(stock);
+    }
+
     private User getCurrentUser() {
         String username = authenticationContext.getCurrentUsername();
         if (username == null)

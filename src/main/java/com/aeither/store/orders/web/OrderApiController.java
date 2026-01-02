@@ -59,20 +59,7 @@ public class OrderApiController {
             return ResponseEntity.notFound().build();
         }
 
-        OrderDetailsDTO dto = new OrderDetailsDTO();
-        dto.setId(order.getId());
-        dto.setOrderNumber(order.getOrderNumber());
-        dto.setStatus(order.getStatus());
-        dto.setTotalAmount(order.getTotalAmount());
-        dto.setStoreName(order.getStore() != null ? order.getStore().getName() : "-");
-
-        dto.setItems(order.getItems().stream().map(item -> new OrderDetailsDTO.ItemDTO(
-                item.getAsset().getName(),
-                item.getQuantity(),
-                item.getUnitPrice(),
-                item.getTotalPrice())).collect(Collectors.toList()));
-
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(orderService.convertToDetailsDTO(order));
     }
 
     @PostMapping("/{id}/status")

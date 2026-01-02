@@ -1,13 +1,17 @@
 package com.aeither.store.orders.application;
 
 import com.aeither.store.orders.domain.model.Order;
+import com.aeither.store.orders.domain.model.OrderItem;
 import com.aeither.store.orders.domain.repository.OrderDomainRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.aeither.store.orders.domain.model.OrderItem;
+import com.aeither.store.orders.web.OrderDetailsDTO;
 import com.aeither.store.orders.web.OrderRequestDTO;
+import com.aeither.store.stock.application.StockService;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +20,7 @@ public class OrderService {
 
     private final com.aeither.store.administration.application.StoreService storeService;
     private final com.aeither.store.assests.application.AssetService assetService;
-    private final com.aeither.store.stock.domain.repository.StockDomainRepository stockRepository;
+    private final StockService stockService;
 
     public List<Order> findAll() {
         return orderRepository.findAll();
@@ -60,19 +64,8 @@ public class OrderService {
             order.getItems().add(item);
             total += item.getTotalPrice();
 
-            // Stock Deduction
-            com.aeither.store.stock.domain.model.Stock stock = stockRepository
-                    .findByCompanyAndAsset(company, item.getAsset())
-                    .orElseThrow(() -> new RuntimeException("Stock not found for asset: " + item.getAsset().getName()));
-
-            if (stock.getQuantity() < item.getQuantity()) {
-                throw new RuntimeException("Insufficient stock for asset: " + item.getAsset().getName());
-            }
-            stock.setQuantity(stock.getQuantity() - item.getQuantity());
-            if (stock.getQuantity() == 0) {
-                stock.setStatus("OUT_OF_STOCK");
-            }
-            stockRepository.save(stock);
+            // Stock Deduction delegated to StockService (SRP/DIP)
+            stockService.deductStock(company, item.getAsset(), item.getQuantity());
         }
 
         order.setTotalAmount(total);
@@ -86,5 +79,25 @@ public class OrderService {
             order.setStatus(status);
             orderRepository.save(order);
         }
+    }
+
+    public OrderDetailsDTO convertToDetailsDTO(Order order) {
+        if (order == null)
+            return null;
+
+        OrderDetailsDTO dto = new OrderDetailsDTO();
+        dto.setId(order.getId());
+        dto.setOrderNumber(order.getOrderNumber());
+        dto.setStatus(order.getStatus());
+        dto.setTotalAmount(order.getTotalAmount());
+        dto.setStoreName(order.getStore() != null ? order.getStore().getName() : "-");
+
+        dto.setItems(order.getItems().stream().map(item -> new OrderDetailsDTO.ItemDTO(
+                item.getAsset().getName(),
+                item.getQuantity(),
+                item.getUnitPrice(),
+                item.getTotalPrice())).collect(Collectors.toList()));
+
+        return dto;
     }
 }
