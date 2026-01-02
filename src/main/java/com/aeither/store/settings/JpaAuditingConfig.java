@@ -1,12 +1,10 @@
 package com.aeither.store.settings;
 
+import com.aeither.store.common.domain.AuthenticationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
 
@@ -15,19 +13,7 @@ import java.util.Optional;
 public class JpaAuditingConfig {
 
     @Bean
-    public AuditorAware<String> auditorProvider() {
-        return () -> {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()
-                    || authentication.getPrincipal().equals("anonymousUser")) {
-                return Optional.empty();
-            }
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof UserDetails) {
-                return Optional.of(((UserDetails) principal).getUsername());
-            } else {
-                return Optional.of(principal.toString());
-            }
-        };
+    public AuditorAware<String> auditorProvider(AuthenticationContext authenticationContext) {
+        return () -> Optional.ofNullable(authenticationContext.getCurrentUsername());
     }
 }

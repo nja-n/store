@@ -14,4 +14,6 @@ public interface UserDomainRepository {
     Optional<User> findById(Long id);
 
     List<User> findByStatusNot(String status);
+
+    Optional<User> findByStoreIdAndStatus(Long storeId, String status);
 }

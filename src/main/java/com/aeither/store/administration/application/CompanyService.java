@@ -1,7 +1,7 @@
 package com.aeither.store.administration.application;
 
 import com.aeither.store.administration.domain.model.Company;
-import com.aeither.store.administration.infrastructure.repository.CompanyRepository;
+import com.aeither.store.administration.domain.repository.CompanyDomainRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyService {
 
-    private final CompanyRepository companyRepository;
+    private final CompanyDomainRepository companyRepository;
 
     public List<Company> findAll() {
         return companyRepository.findByStatusNot("DELETED");

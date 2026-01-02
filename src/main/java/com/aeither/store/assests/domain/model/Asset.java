@@ -35,4 +35,7 @@ public class Asset extends AuditableEntity {
     private String status;
 
     private String model;
+
+    private Double mrp;
+    private Double wholesalePrice;
 }

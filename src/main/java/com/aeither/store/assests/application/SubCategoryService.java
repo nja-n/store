@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.aeither.store.assests.domain.model.SubCategory;
-import com.aeither.store.assests.infrastructure.repository.SubCategoryRepository;
+import com.aeither.store.assests.domain.repository.SubCategoryDomainRepository;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubCategoryService {
 
-    private final SubCategoryRepository subCategoryRepository;
+    private final SubCategoryDomainRepository subCategoryRepository;
 
     public List<SubCategory> findAll() {
         return subCategoryRepository.findAll().stream()

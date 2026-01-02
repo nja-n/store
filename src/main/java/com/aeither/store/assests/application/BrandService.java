@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.aeither.store.assests.domain.model.Brand;
-import com.aeither.store.assests.infrastructure.repository.BrandRepository;
+import com.aeither.store.assests.domain.repository.BrandDomainRepository;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BrandService {
 
-    private final BrandRepository brandRepository;
+    private final BrandDomainRepository brandRepository;
 
     public List<Brand> findAll() {
         return brandRepository.findAll().stream()

@@ -47,6 +47,20 @@ public class AssetDataSaver implements SetupDataSaver {
         asset.setSerialNumber(requestData.get("serialNumber"));
         asset.setModel(requestData.get("model"));
         asset.setAssetNumber(requestData.get("assetNumber"));
+
+        try {
+            String mrpStr = requestData.get("mrp");
+            if (mrpStr != null && !mrpStr.isEmpty()) {
+                asset.setMrp(Double.parseDouble(mrpStr));
+            }
+            String wholesalePriceStr = requestData.get("wholesalePrice");
+            if (wholesalePriceStr != null && !wholesalePriceStr.isEmpty()) {
+                asset.setWholesalePrice(Double.parseDouble(wholesalePriceStr));
+            }
+        } catch (NumberFormatException e) {
+            // Log or handle error if needed
+        }
+
         if (asset.getId() == null) {
             asset.setStatus("ACTIVE");
         }

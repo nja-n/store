@@ -5,7 +5,7 @@ import com.aeither.store.administration.domain.repository.UserDomainRepository;
 import com.aeither.store.stock.domain.model.Stock;
 import com.aeither.store.stock.domain.repository.StockDomainRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.aeither.store.common.domain.AuthenticationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -18,6 +18,7 @@ public class StockService {
 
     private final StockDomainRepository stockRepository;
     private final UserDomainRepository userRepository;
+    private final AuthenticationContext authenticationContext;
 
     public List<Stock> getMyCompanyStocks() {
         User currentUser = getCurrentUser();
@@ -25,6 +26,10 @@ public class StockService {
             return stockRepository.findByCompany(currentUser.getCompany());
         }
         return Collections.emptyList();
+    }
+
+    public List<Stock> getMyCompanyCompanyStocks(com.aeither.store.administration.domain.model.Company company) {
+        return stockRepository.findByCompany(company);
     }
 
     public Stock saveStock(Stock stock) {
@@ -48,7 +53,9 @@ public class StockService {
     }
 
     private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = authenticationContext.getCurrentUsername();
+        if (username == null)
+            return null;
         return userRepository.findByUsername(username).orElse(null);
     }
 }

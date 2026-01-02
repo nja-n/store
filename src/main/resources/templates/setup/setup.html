@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <title>Setup - Store</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<head th:replace="~{fragments :: head('Asset Setup')}"></head>
 
 <body>
-    <div class="container mt-5">
-        <h1>Setup</h1>
+    <header
+        th:replace="~{fragments :: header('Asset Setup', 'Configure your categories, brands, and asset inventory')}">
+    </header>
 
+    <div class="container mb-5">
         <ul class="nav nav-tabs" id="setupTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="category-tab" data-bs-toggle="tab" data-bs-target="#category"
@@ -27,202 +26,250 @@
                 <button class="nav-link" id="asset-tab" data-bs-toggle="tab" data-bs-target="#asset" type="button"
                     role="tab">Assets</button>
             </li>
+            <li class="nav-item">
+                <a class="nav-link text-primary fw-bold" href="/stock">Stock Management →</a>
+            </li>
         </ul>
 
         <div class="tab-content mt-3" id="setupContent">
             <!-- Category Tab -->
             <div class="tab-pane fade show active" id="category" role="tabpanel">
-                <h3>Add Category</h3>
-                <form method="post" th:action="@{/setup/category}" th:object="${category}">
-                    <input type="hidden" id="categoryId" name="id" />
-                    <div class="mb-3">
-                        <label for="categoryName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="categoryName" name="name" th:field="*{name}">
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-body">
+                        <h3>Add Category</h3>
+                        <form method="post" th:action="@{/setup/category}" th:object="${category}">
+                            <input type="hidden" id="categoryId" name="id" />
+                            <div class="mb-3">
+                                <label for="categoryName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="categoryName" name="name"
+                                    th:field="*{name}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </form>
+                </div>
 
                 <h4 class="mt-4">Existing Categories</h4>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="cat : ${categories}">
-                            <td th:text="${cat.id}"></td>
-                            <td th:text="${cat.name}"></td>
-                            <td>
-                                <button class="btn btn-sm btn-warning"
-                                    th:onclick="editCategory([[${cat.id}]], [[${cat.name}]])">Edit</button>
-                                <form th:action="@{/setup/category/delete/{id}(id=${cat.id})}" method="post"
-                                    style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cat : ${categories}">
+                                <td th:text="${cat.id}"></td>
+                                <td th:text="${cat.name}"></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning"
+                                        th:onclick="editCategory([[${cat.id}]], [[${cat.name}]])">Edit</button>
+                                    <form th:action="@{/setup/category/delete/{id}(id=${cat.id})}" method="post"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Sub-Category Tab -->
             <div class="tab-pane fade" id="subcategory" role="tabpanel">
-                <h3>Add Sub-Category</h3>
-                <form method="post" th:action="@{/setup/subcategory}" th:object="${subCategory}">
-                    <input type="hidden" id="subCategoryId" name="id" />
-                    <div class="mb-3">
-                        <label for="parentCategory" class="form-label">Parent Category</label>
-                        <select class="form-select" id="parentCategory" name="category.id">
-                            <option value="">Select Category</option>
-                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
-                        </select>
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-body">
+                        <h3>Add Sub-Category</h3>
+                        <form method="post" th:action="@{/setup/subcategory}" th:object="${subCategory}">
+                            <input type="hidden" id="subCategoryId" name="id" />
+                            <div class="mb-3">
+                                <label for="parentCategory" class="form-label">Parent Category</label>
+                                <select class="form-select" id="parentCategory" name="category.id">
+                                    <option value="">Select Category</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subCategoryName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="subCategoryName" name="name"
+                                    th:field="*{name}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="subCategoryName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="subCategoryName" name="name" th:field="*{name}">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </form>
+                </div>
 
                 <h4 class="mt-4">Existing Sub-Categories</h4>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="sub : ${subCategories}">
-                            <td th:text="${sub.id}"></td>
-                            <td th:text="${sub.name}"></td>
-                            <td th:text="${sub.category != null ? sub.category.name : '-'}"></td>
-                            <td>
-                                <button class="btn btn-sm btn-warning"
-                                    th:onclick="editSubCategory([[${sub.id}]], [[${sub.name}]], [[${sub.category?.id}]])">Edit</button>
-                                <form th:action="@{/setup/subcategory/delete/{id}(id=${sub.id})}" method="post"
-                                    style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="sub : ${subCategories}">
+                                <td th:text="${sub.id}"></td>
+                                <td th:text="${sub.name}"></td>
+                                <td th:text="${sub.category != null ? sub.category.name : '-'}"></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning"
+                                        th:onclick="editSubCategory([[${sub.id}]], [[${sub.name}]], [[${sub.category?.id}]])">Edit</button>
+                                    <form th:action="@{/setup/subcategory/delete/{id}(id=${sub.id})}" method="post"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Brand Tab -->
             <div class="tab-pane fade" id="brand" role="tabpanel">
-                <h3>Add Brand</h3>
-                <form method="post" th:action="@{/setup/brand}" th:object="${brand}">
-                    <input type="hidden" id="brandId" name="id" />
-                    <div class="mb-3">
-                        <label for="brandName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="brandName" name="name" th:field="*{name}">
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-body">
+                        <h3>Add Brand</h3>
+                        <form method="post" th:action="@{/setup/brand}" th:object="${brand}">
+                            <input type="hidden" id="brandId" name="id" />
+                            <div class="mb-3">
+                                <label for="brandName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="brandName" name="name" th:field="*{name}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </form>
+                </div>
 
                 <h4 class="mt-4">Existing Brands</h4>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="b : ${brands}">
-                            <td th:text="${b.id}"></td>
-                            <td th:text="${b.name}"></td>
-                            <td>
-                                <button class="btn btn-sm btn-warning"
-                                    th:onclick="editBrand([[${b.id}]], [[${b.name}]])">Edit</button>
-                                <form th:action="@{/setup/brand/delete/{id}(id=${b.id})}" method="post"
-                                    style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="b : ${brands}">
+                                <td th:text="${b.id}"></td>
+                                <td th:text="${b.name}"></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning"
+                                        th:onclick="editBrand([[${b.id}]], [[${b.name}]])">Edit</button>
+                                    <form th:action="@{/setup/brand/delete/{id}(id=${b.id})}" method="post"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Asset Tab -->
             <div class="tab-pane fade" id="asset" role="tabpanel">
-                <h3>Add Asset</h3>
-                <form method="post" th:action="@{/setup/asset}" th:object="${asset}">
-                    <input type="hidden" id="assetId" name="id" />
-                    <div class="mb-3">
-                        <label for="assetSubCategory" class="form-label">Sub-Category</label>
-                        <select class="form-select" id="assetSubCategory" name="subCategory.id">
-                            <option value="">Select Sub-Category</option>
-                            <option th:each="sub : ${subCategories}" th:value="${sub.id}" th:text="${sub.name}">
-                            </option>
-                        </select>
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-body">
+                        <h3>Add Asset</h3>
+                        <form method="post" th:action="@{/setup/asset}" th:object="${asset}">
+                            <input type="hidden" id="assetId" name="id" />
+                            <div class="mb-3">
+                                <label for="assetSubCategory" class="form-label">Sub-Category</label>
+                                <select class="form-select" id="assetSubCategory" name="subCategory.id">
+                                    <option value="">Select Sub-Category</option>
+                                    <option th:each="sub : ${subCategories}" th:value="${sub.id}" th:text="${sub.name}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="assetBrand" class="form-label">Brand</label>
+                                <select class="form-select" id="assetBrand" name="brand.id">
+                                    <option value="">Select Brand</option>
+                                    <option th:each="brandItem : ${brands}" th:value="${brandItem.id}"
+                                        th:text="${brandItem.name}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Model</label>
+                                <input type="text" class="form-control" id="model" name="model" th:field="*{model}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="assetNumber" class="form-label">Asset Number</label>
+                                <input type="text" class="form-control" id="assetNumber" name="assetNumber"
+                                    th:field="*{assetNumber}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="serialNumber" class="form-label">Serial Number</label>
+                                <input type="text" class="form-control" id="serialNumber" name="serialNumber"
+                                    th:field="*{serialNumber}">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="mrp" class="form-label">MRP</label>
+                                    <input type="number" step="0.01" class="form-control" id="mrp" name="mrp"
+                                        th:field="*{mrp}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="wholesalePrice" class="form-label">Wholesale Price</label>
+                                    <input type="number" step="0.01" class="form-control" id="wholesalePrice"
+                                        name="wholesalePrice" th:field="*{wholesalePrice}">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="assetBrand" class="form-label">Brand</label>
-                        <select class="form-select" id="assetBrand" name="brand.id">
-                            <option value="">Select Brand</option>
-                            <option th:each="brandItem : ${brands}" th:value="${brandItem.id}"
-                                th:text="${brandItem.name}"></option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="model" class="form-label">Model</label>
-                        <input type="text" class="form-control" id="model" name="model" th:field="*{model}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="assetNumber" class="form-label">Asset Number</label>
-                        <input type="text" class="form-control" id="assetNumber" name="assetNumber"
-                            th:field="*{assetNumber}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="serialNumber" class="form-label">Serial Number</label>
-                        <input type="text" class="form-control" id="serialNumber" name="serialNumber"
-                            th:field="*{serialNumber}">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </form>
+                </div>
 
                 <h4 class="mt-4">Existing Assets</h4>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Model</th>
-                            <th>Brand</th>
-                            <th>Sub-Category</th>
-                            <th>Serial #</th>
-                            <th>Asset #</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="a : ${assets}">
-                            <td th:text="${a.id}"></td>
-                            <td th:text="${a.model}"></td>
-                            <td th:text="${a.brand != null ? a.brand.name : '-'}"></td>
-                            <td th:text="${a.subCategory != null ? a.subCategory.name : '-'}"></td>
-                            <td th:text="${a.serialNumber}"></td>
-                            <td th:text="${a.assetNumber}"></td>
-                            <td>
-                                <button class="btn btn-sm btn-warning"
-                                    th:onclick="editAsset([[${a.id}]], [[${a.model}]], [[${a.assetNumber}]], [[${a.serialNumber}]], [[${a.subCategory?.id}]], [[${a.brand?.id}]])">Edit</button>
-                                <form th:action="@{/setup/asset/delete/{id}(id=${a.id})}" method="post"
-                                    style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Model</th>
+                                <th>Brand</th>
+                                <th>Sub-Category</th>
+                                <th>Serial #</th>
+                                <th>Asset #</th>
+                                <th>MRP</th>
+                                <th>W. Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="a : ${assets}">
+                                <td th:text="${a.id}"></td>
+                                <td th:text="${a.model}"></td>
+                                <td th:text="${a.brand != null ? a.brand.name : '-'}"></td>
+                                <td th:text="${a.subCategory != null ? a.subCategory.name : '-'}"></td>
+                                <td th:text="${a.serialNumber}"></td>
+                                <td th:text="${a.assetNumber}"></td>
+                                <td th:text="${a.mrp != null ? '$' + #numbers.formatDecimal(a.mrp, 1, 2) : '-'}"></td>
+                                <td
+                                    th:text="${a.wholesalePrice != null ? '$' + #numbers.formatDecimal(a.wholesalePrice, 1, 2) : '-'}">
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning"
+                                        th:onclick="editAsset([[${a.id}]], [[${a.model}]], [[${a.assetNumber}]], [[${a.serialNumber}]], [[${a.subCategory?.id}]], [[${a.brand?.id}]], [[${a.mrp}]], [[${a.wholesalePrice}]])">Edit</button>
+                                    <form th:action="@{/setup/asset/delete/{id}(id=${a.id})}" method="post"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -241,16 +288,19 @@
             document.getElementById('brandId').value = id;
             document.getElementById('brandName').value = name;
         }
-        function editAsset(id, model, assetNumber, serialNumber, subCatId, brandId) {
+        function editAsset(id, model, assetNumber, serialNumber, subCatId, brandId, mrp, wholesalePrice) {
             document.getElementById('assetId').value = id;
             document.getElementById('model').value = model;
             document.getElementById('assetNumber').value = assetNumber;
             document.getElementById('serialNumber').value = serialNumber;
             document.getElementById('assetSubCategory').value = subCatId || '';
             document.getElementById('assetBrand').value = brandId || '';
+            document.getElementById('mrp').value = mrp || '';
+            document.getElementById('wholesalePrice').value = wholesalePrice || '';
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <footer th:replace="~{fragments :: footer}"></footer>
 </body>
 
 </html>

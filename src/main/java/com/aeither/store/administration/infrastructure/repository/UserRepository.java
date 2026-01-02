@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserDomainRep
     Optional<User> findByUsername(String username);
 
     List<User> findByStatusNot(String status);
+
+    Optional<User> findByStoreIdAndStatus(Long storeId, String status);
 }

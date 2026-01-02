@@ -13,6 +13,8 @@ import java.util.List;
 public class StoreSetupProvider implements SetupDataProvider {
 
     private final StoreService storeService;
+    private final com.aeither.store.administration.application.UserService userService;
+    private final com.aeither.store.common.domain.AuthenticationContext authenticationContext;
 
     @Override
     public String getKey() {
@@ -31,6 +33,11 @@ public class StoreSetupProvider implements SetupDataProvider {
 
     @Override
     public List<?> getList() {
+        com.aeither.store.administration.domain.model.User currentUser = userService
+                .findByUsername(authenticationContext.getCurrentUsername());
+        if (currentUser != null && "COMPANY_ADMIN".equals(currentUser.getRole()) && currentUser.getCompany() != null) {
+            return storeService.findByCompanyId(currentUser.getCompany().getId());
+        }
         return storeService.findAll();
     }
 }

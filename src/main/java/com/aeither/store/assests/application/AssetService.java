@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.aeither.store.assests.domain.model.Asset;
-import com.aeither.store.assests.infrastructure.repository.AssetRepository;
+import com.aeither.store.assests.domain.repository.AssetDomainRepository;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AssetService {
 
-    private final AssetRepository assetRepository;
+    private final AssetDomainRepository assetRepository;
 
     public List<Asset> findAll() {
         return assetRepository.findAll().stream()
@@ -21,6 +21,20 @@ public class AssetService {
     }
 
     public Asset save(Asset asset) {
+        StringBuilder fullName = new StringBuilder();
+        if (asset.getSubCategory() != null) {
+            if (asset.getSubCategory().getCategory() != null) {
+                fullName.append(asset.getSubCategory().getCategory().getName()).append(" ");
+            }
+            fullName.append(asset.getSubCategory().getName()).append(" ");
+        }
+        if (asset.getBrand() != null) {
+            fullName.append(asset.getBrand().getName()).append(" ");
+        }
+        if (asset.getModel() != null) {
+            fullName.append(asset.getModel());
+        }
+        asset.setName(fullName.toString().trim());
         return assetRepository.save(asset);
     }
 

@@ -1,7 +1,7 @@
 package com.aeither.store.administration.application;
 
 import com.aeither.store.administration.domain.model.Store;
-import com.aeither.store.administration.infrastructure.repository.StoreRepository;
+import com.aeither.store.administration.domain.repository.StoreDomainRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +11,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StoreService {
 
-    private final StoreRepository storeRepository;
+    private final StoreDomainRepository storeRepository;
 
     public List<Store> findAll() {
         return storeRepository.findByStatusNot("DELETED");
+    }
+
+    public List<Store> findByCompanyId(Long companyId) {
+        return storeRepository.findByCompanyIdAndStatusNot(companyId, "DELETED");
     }
 
     public Store findById(Long id) {
@@ -34,5 +38,9 @@ public class StoreService {
             store.setStatus("DELETED");
             storeRepository.save(store);
         }
+    }
+
+    public List<Store> search(Long companyId, String name) {
+        return storeRepository.findByCompanyIdAndNameContainingIgnoreCase(companyId, name);
     }
 }

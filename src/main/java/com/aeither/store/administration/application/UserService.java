@@ -22,6 +22,10 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
     public User save(User user) {
         if (user.getStatus() == null) {
             user.setStatus("ACTIVE");
@@ -36,6 +40,10 @@ public class UserService {
             }
         }
         return userRepository.save(user);
+    }
+
+    public User findByStoreId(Long storeId) {
+        return userRepository.findByStoreIdAndStatus(storeId, "ACTIVE").orElse(null);
     }
 
     public void delete(Long id) {

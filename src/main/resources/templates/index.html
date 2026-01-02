@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments :: head('Sitemap')}"></head>
+
+<body>
+    <header th:replace="~{fragments :: header('System Sitemap', 'Central Navigation Dashboard')}"></header>
+
+    <div class="container mb-5">
+        <div class="row g-4 justify-content-center">
+            <!-- Administration Module -->
+            <div class="col-md-4">
+                <!-- If admin, go to admin setup. If company admin, go to asset setup. Else go to profile -->
+                <a th:href="${#authorization.expression('hasRole(''ADMIN'')')} ? '/admin/setup' : (${#authorization.expression('hasRole(''COMPANY_ADMIN'')')} ? '/setup' : '/profile')"
+                    class="module-card">
+                    <div class="icon-box">ADM</div>
+                    <div class="module-title">Administration</div>
+                    <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="module-desc">Manage
+                        Companies, Stores, and User Accounts. Full system setup.</div>
+                    <div th:if="${#authorization.expression('hasRole(''COMPANY_ADMIN'')')}" class="module-desc">Manage
+                        Assets, Brands, and Categories for your company.</div>
+                    <div th:if="${#authorization.expression('hasRole(''STORE_USER'')')}" class="module-desc">Update your
+                        profile information and account settings.</div>
+                </a>
+            </div>
+
+            <!-- Stock Module -->
+            <div class="col-md-4" sec:authorize="isAuthenticated()">
+                <a href="/stock" class="module-card">
+                    <div class="icon-box">STK</div>
+                    <div class="module-title">Stock Management</div>
+                    <div class="module-desc">Track company inventory levels for assets. Filtered by your company
+                        context.</div>
+                </a>
+            </div>
+            
+            <!-- Orders Module -->
+            <div class="col-md-4" sec:authorize="isAuthenticated()">
+                <a href="/orders" class="module-card">
+                    <div class="icon-box">ORD</div>
+                    <div class="module-title">Order Management</div>
+                    <div class="module-desc">Centralized order tracking and fulfillment for all your store locations.
+                    </div>
+                </a>
+            </div>
+
+            <!-- Calculator Module -->
+            <div class="col-md-4">
+                <a href="/calculator" class="module-card">
+                    <div class="icon-box">CAL</div>
+                    <div class="module-title">Retro Calculator</div>
+                    <div class="module-desc">A SOLID-compliant tool for quick math operations in a vintage style.</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+
+</html>

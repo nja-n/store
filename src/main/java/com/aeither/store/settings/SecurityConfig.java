@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity in Setup, ideally enable for Web
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/login", "/logout", "/calculator/**", "/css/**", "/js/**",
+                        .requestMatchers("/", "/auth/**", "/login", "/logout", "/calculator/**", "/css/**", "/js/**",
                                 "/images/**")
                         .permitAll()
                         .anyRequest().authenticated())

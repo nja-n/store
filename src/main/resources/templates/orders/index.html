@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments :: head('Order Management')}"></head>
+
+<body>
+    <header
+        th:replace="~{fragments :: header('Order Management', 'Manage sales and purchase orders across your stores')}">
+    </header>
+
+    <div class="container mb-5">
+        <div class="row">
+            <!-- Create Order Card -->
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-1">
+                        <h5 class="fw-bold">Step 1: Select Store & Search Assets</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Store Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Target Store</label>
+                            <select class="form-select" id="storeId" onchange="validateSubmit()">
+                                <option value="">Select a store...</option>
+                                <option th:each="store : ${stores}" th:value="${store.id}"
+                                    th:text="${store.name + ' (' + store.location + ')'}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Asset Selection -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Asset (Available Stock)</label>
+                            <select class="form-select" id="assetSelect" onchange="handleAssetSelection()">
+                                <option value="">Choose an asset...</option>
+                                <option th:each="stock : ${stocks}" th:value="${stock.asset.id}"
+                                    th:disabled="${stock.quantity <= 0}" th:data-name="${stock.asset.name}"
+                                    th:data-brand="${stock.asset.brand?.name}" th:data-model="${stock.asset.model}"
+                                    th:data-mrp="${stock.asset.mrp}" th:data-wholesale="${stock.asset.wholesalePrice}"
+                                    th:data-quantity="${stock.quantity}"
+                                    th:text="${stock.asset.name + ' - MRP: $' + (stock.asset.mrp ?: '0.00') + ' (Qty: ' + stock.quantity + ')'}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Card -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div
+                        class="card-header bg-white border-0 pt-4 pb-1 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold">Step 2: Review Cart</h5>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearCart()">Clear</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0" id="cartTable">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-3">Item</th>
+                                        <th width="80">Qty</th>
+                                        <th width="100">Price</th>
+                                        <th width="40"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cartItems">
+                                    <!-- Cart items will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="emptyCart" class="text-center py-5 text-muted">
+                            Your cart is empty
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="fw-bold">Total Amount:</span>
+                            <span class="fw-bold text-primary" id="cartTotal">$0.00</span>
+                        </div>
+                        <button id="submitOrderBtn" class="btn btn-primary w-100 py-2 fw-bold" onclick="submitOrder()"
+                            disabled>
+                            Submit Order & Update Stock
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Table Card -->
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-1">
+                        <h5 class="fw-bold">Order History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Store</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="order : ${orders}">
+                                        <td class="fw-bold" th:text="${order.orderNumber}">ORD-000</td>
+                                        <td th:text="${order.store != null ? order.store.name : 'Unknown Store'}">Store
+                                        </td>
+                                        <td th:text="${'$' + #numbers.formatDecimal(order.totalAmount, 1, 2)}">$0.00
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info rounded-pill px-3"
+                                                th:text="${order.status}">PENDING</span>
+                                        </td>
+                                        <td th:text="${#temporals.format(order.createdTime, 'yyyy-MM-dd HH:mm')}">
+                                            2026-01-01</td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(orders)}">
+                                        <td colspan="5" class="text-center py-4 text-muted">No orders found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let cart = [];
+
+        // Elements
+        const storeIdSelect = document.getElementById('storeId');
+        const assetSelect = document.getElementById('assetSelect');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const emptyCart = document.getElementById('emptyCart');
+        const submitOrderBtn = document.getElementById('submitOrderBtn');
+
+        // Asset Selection Logic
+        function handleAssetSelection() {
+            const selectedOption = assetSelect.options[assetSelect.selectedIndex];
+            if (!selectedOption.value) return;
+
+            const stock = {
+                asset: {
+                    id: parseInt(selectedOption.value),
+                    name: selectedOption.getAttribute('data-name'),
+                    brand: { name: selectedOption.getAttribute('data-brand') },
+                    model: selectedOption.getAttribute('data-model'),
+                    mrp: parseFloat(selectedOption.getAttribute('data-mrp') || 0),
+                    wholesalePrice: parseFloat(selectedOption.getAttribute('data-wholesale') || 0)
+                },
+                quantity: parseInt(selectedOption.getAttribute('data-quantity'))
+            };
+
+            addToCart(stock);
+            assetSelect.value = ''; // Reset select after adding
+        }
+
+        // Cart Management
+        function addToCart(stock) {
+            const existing = cart.find(item => item.assetId === stock.asset.id);
+            if (existing) {
+                if (existing.quantity < stock.quantity) {
+                    existing.quantity++;
+                } else {
+                    alert("Cannot exceed available stock!");
+                }
+            } else {
+                cart.push({
+                    assetId: stock.asset.id,
+                    name: stock.asset.name,
+                    quantity: 1,
+                    mrp: stock.asset.mrp,
+                    price: stock.asset.wholesalePrice,
+                    maxStock: stock.quantity
+                });
+            }
+            renderCart();
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(it => it.assetId !== id);
+            renderCart();
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(it => it.assetId === id);
+            if (item) {
+                const newQty = item.quantity + delta;
+                if (newQty > 0 && newQty <= item.maxStock) {
+                    item.quantity = newQty;
+                } else if (newQty > item.maxStock) {
+                    alert("Insufficient stock!");
+                }
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            cartItems.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                emptyCart.style.display = 'block';
+            } else {
+                emptyCart.style.display = 'none';
+                cart.forEach(item => {
+                    total += item.quantity * item.price;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="ps-3">
+                            <div class="fw-bold">${item.name}</div>
+                            <small class="text-muted">MRP: $${item.mrp.toFixed(2)} | W.Price: $${item.price.toFixed(2)}</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-xs btn-outline-secondary p-0" style="width:20px" onclick="updateQty(${item.assetId}, -1)">-</button>
+                                <span class="mx-2">${item.quantity}</span>
+                                <button class="btn btn-xs btn-outline-secondary p-0" style="width:20px" onclick="updateQty(${item.assetId}, 1)">+</button>
+                            </div>
+                        </td>
+                        <td class="fw-bold">$${(item.quantity * item.price).toFixed(2)}</td>
+                        <td><button class="btn btn-link text-danger p-0" onclick="removeFromCart(${item.assetId})">&times;</button></td>
+                    `;
+                    cartItems.appendChild(row);
+                });
+            }
+
+            cartTotal.innerText = `$${total.toFixed(2)}`;
+            validateSubmit();
+        }
+
+        function clearCart() {
+            cart = [];
+            renderCart();
+        }
+
+        function validateSubmit() {
+            const storeValid = storeIdSelect.value !== '';
+            const cartValid = cart.length > 0;
+            submitOrderBtn.disabled = !(storeValid && cartValid);
+        }
+
+        function submitOrder() {
+            if (!confirm("Are you sure you want to submit this order? Stock will be updated immediately.")) return;
+
+            const request = {
+                storeId: storeIdSelect.value,
+                items: cart.map(it => ({
+                    assetId: it.assetId,
+                    quantity: it.quantity,
+                    price: it.price
+                }))
+            };
+
+            fetch('/api/orders/place', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert("Order placed successfully!");
+                        window.location.reload();
+                    } else {
+                        res.text().then(msg => alert("Error: " + msg));
+                    }
+                });
+        }
+    </script>
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+
+</html>
