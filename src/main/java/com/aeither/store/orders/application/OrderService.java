@@ -78,4 +78,13 @@ public class OrderService {
         order.setTotalAmount(total);
         return orderRepository.save(order);
     }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void updateStatus(Long id, String status) {
+        Order order = findById(id);
+        if (order != null) {
+            order.setStatus(status);
+            orderRepository.save(order);
+        }
+    }
 }

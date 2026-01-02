@@ -33,13 +33,23 @@
                         context.</div>
                 </a>
             </div>
-            
+
             <!-- Orders Module -->
             <div class="col-md-4" sec:authorize="isAuthenticated()">
                 <a href="/orders" class="module-card">
                     <div class="icon-box">ORD</div>
                     <div class="module-title">Order Management</div>
                     <div class="module-desc">Centralized order tracking and fulfillment for all your store locations.
+                    </div>
+                </a>
+            </div>
+
+            <!-- Delivery Module -->
+            <div class="col-md-4" sec:authorize="isAuthenticated()">
+                <a href="/delivery" class="module-card">
+                    <div class="icon-box">DLV</div>
+                    <div class="module-title">Delivery Tracking</div>
+                    <div class="module-desc">Manage the lifecycle of orders from preparation to final delivery.
                     </div>
                 </a>
             </div>

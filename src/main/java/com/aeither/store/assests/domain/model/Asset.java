@@ -38,4 +38,21 @@ public class Asset extends AuditableEntity {
 
     private Double mrp;
     private Double wholesalePrice;
+
+    public void updateFullName() {
+        StringBuilder sb = new StringBuilder();
+        if (subCategory != null && subCategory.getCategory() != null) {
+            sb.append(subCategory.getCategory().getName()).append(" ");
+        }
+        if (subCategory != null) {
+            sb.append(subCategory.getName()).append(" ");
+        }
+        if (brand != null) {
+            sb.append(brand.getName()).append(" ");
+        }
+        if (model != null && !model.isEmpty()) {
+            sb.append(model);
+        }
+        this.name = sb.toString().trim();
+    }
 }

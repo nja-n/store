@@ -104,8 +104,9 @@
                 <a href="/" class="text-white me-3" style="opacity: 0.8">← Home</a>
                 <span sec:authorize="isAuthenticated()">
                     Hello, <span sec:authentication="name">User</span> |
-                    <a href="/profile" class="text-white me-2">My Profile</a> |
-                    <a href="/logout" class="text-white">Logout</a>
+                    <a href="/delivery" class="text-white mx-2">Delivery Tracking</a> |
+                    <a href="/profile" class="text-white mx-2">My Profile</a> |
+                    <a href="/logout" class="text-white ms-2">Logout</a>
                 </span>
                 <span sec:authorize="isAnonymous()">
                     <a href="/login" class="text-white">Login</a>

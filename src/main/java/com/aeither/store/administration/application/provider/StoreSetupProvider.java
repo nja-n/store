@@ -35,9 +35,6 @@ public class StoreSetupProvider implements SetupDataProvider {
     public List<?> getList() {
         com.aeither.store.administration.domain.model.User currentUser = userService
                 .findByUsername(authenticationContext.getCurrentUsername());
-        if (currentUser != null && "COMPANY_ADMIN".equals(currentUser.getRole()) && currentUser.getCompany() != null) {
-            return storeService.findByCompanyId(currentUser.getCompany().getId());
-        }
-        return storeService.findAll();
+        return storeService.findInContext(currentUser);
     }
 }

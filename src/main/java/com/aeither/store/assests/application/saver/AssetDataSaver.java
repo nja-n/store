@@ -79,6 +79,7 @@ public class AssetDataSaver implements SetupDataSaver {
             asset.setBrand(brand);
         }
 
+        asset.updateFullName();
         assetService.save(asset);
     }
 }

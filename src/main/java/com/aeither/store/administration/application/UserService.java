@@ -53,4 +53,30 @@ public class UserService {
             userRepository.save(user);
         }
     }
+
+    public void ensureStoreUserExists(com.aeither.store.administration.domain.model.Store store, boolean enabled,
+            User creator) {
+        User storeUser = findByStoreId(store.getId());
+
+        if (enabled) {
+            if (storeUser == null) {
+                storeUser = new User();
+                storeUser.setUsername("store_" + store.getName().toLowerCase().replace(" ", "_"));
+                storeUser.setPassword("password123");
+                storeUser.setRole(Role.STORE_USER);
+                storeUser.setStore(store);
+                if (creator != null) {
+                    storeUser.setCompany(creator.getCompany());
+                }
+                save(storeUser);
+            } else if ("DELETED".equals(storeUser.getStatus())) {
+                storeUser.setStatus("ACTIVE");
+                save(storeUser);
+            }
+        } else {
+            if (storeUser != null && !"DELETED".equals(storeUser.getStatus())) {
+                delete(storeUser.getId());
+            }
+        }
+    }
 }

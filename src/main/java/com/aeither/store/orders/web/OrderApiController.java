@@ -51,4 +51,37 @@ public class OrderApiController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDetailsDTO> getOrderDetails(@PathVariable Long id) {
+        com.aeither.store.orders.domain.model.Order order = orderService.findById(id);
+        if (order == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        OrderDetailsDTO dto = new OrderDetailsDTO();
+        dto.setId(order.getId());
+        dto.setOrderNumber(order.getOrderNumber());
+        dto.setStatus(order.getStatus());
+        dto.setTotalAmount(order.getTotalAmount());
+        dto.setStoreName(order.getStore() != null ? order.getStore().getName() : "-");
+
+        dto.setItems(order.getItems().stream().map(item -> new OrderDetailsDTO.ItemDTO(
+                item.getAsset().getName(),
+                item.getQuantity(),
+                item.getUnitPrice(),
+                item.getTotalPrice())).collect(Collectors.toList()));
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        try {
+            orderService.updateStatus(id, status);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

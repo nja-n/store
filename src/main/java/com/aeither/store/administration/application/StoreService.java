@@ -43,4 +43,12 @@ public class StoreService {
     public List<Store> search(Long companyId, String name) {
         return storeRepository.findByCompanyIdAndNameContainingIgnoreCase(companyId, name);
     }
+
+    public List<Store> findInContext(com.aeither.store.administration.domain.model.User user) {
+        if (user != null && com.aeither.store.administration.domain.model.Role.COMPANY_ADMIN.equals(user.getRole())
+                && user.getCompany() != null) {
+            return findByCompanyId(user.getCompany().getId());
+        }
+        return findAll();
+    }
 }
