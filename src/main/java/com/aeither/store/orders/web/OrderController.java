@@ -38,7 +38,7 @@ public class OrderController {
         } else if (currentUser.getCompany() != null) {
             model.addAttribute("orders", orderService.findByCompanyId(currentUser.getCompany().getId()));
             model.addAttribute("stores", storeService.findAll().stream()
-                    .filter(s -> currentUser.getCompany().getId().equals(s.getCompanyId()))
+                    // .filter(s -> currentUser.getCompany().getId().equals(s.getCompanyId()))
                     .toList());
             model.addAttribute("stocks", stockService.getMyCompanyStocks());
         } else {

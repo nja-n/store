@@ -9,7 +9,7 @@
     <div class="container mb-5">
         <div class="row g-4 justify-content-center">
             <!-- Administration Module -->
-            <div class="col-md-4">
+            <div class="col-md-4" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
                 <!-- If admin, go to admin setup. If company admin, go to asset setup. Else go to profile -->
                 <a th:href="${#authorization.expression('hasRole(''ADMIN'')')} ? '/admin/setup' : (${#authorization.expression('hasRole(''COMPANY_ADMIN'')')} ? '/setup' : '/profile')"
                     class="module-card">
@@ -21,6 +21,15 @@
                         Assets, Brands, and Categories for your company.</div>
                     <div th:if="${#authorization.expression('hasRole(''STORE_USER'')')}" class="module-desc">Update your
                         profile information and account settings.</div>
+                </a>
+            </div>
+
+            <!-- Asset Setup Module -->
+            <div class="col-md-4" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <a href="/setup" class="module-card">
+                    <div class="icon-box">SET</div>
+                    <div class="module-title">Asset Setup</div>
+                    <div class="module-desc">Manage Assets, Brands, and Categories for your company.</div>
                 </a>
             </div>
 

@@ -20,4 +20,11 @@ public class Company extends AuditableEntity {
     private String name;
 
     private String status; // ACTIVE, DELETED
+
+    private String gstin;
+    private String address;
+    private String phone;
+    private String email;
+    private String website;
+    private String logo;
 }

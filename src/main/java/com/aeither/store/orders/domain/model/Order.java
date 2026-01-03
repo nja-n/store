@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 
 @Entity
 @Table(name = "orders")
@@ -27,7 +29,14 @@ public class Order extends AuditableEntity {
     private String orderNumber;
     private String status; // PENDING, COMPLETED, CANCELLED
     private Double totalAmount;
+    private Date date;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
+
+    public Date getDueDate() {
+        return Date.from(
+                this.date.toInstant()
+                        .plus(7, ChronoUnit.DAYS));
+    }
 }

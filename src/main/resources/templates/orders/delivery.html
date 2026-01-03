@@ -37,7 +37,7 @@
                                         th:classappend="${order.status == 'DELIVERED' ? 'bg-success' : 'bg-warning'}"
                                         th:text="${order.status}">PENDING</span>
                                 </td>
-                                <td>
+                                <td class="d-flex gap-2">
                                     <div th:id="'actions-' + ${order.id}">
                                         <button th:if="${order.status == 'PENDING'}" class="btn btn-sm btn-primary"
                                             th:onclick="'updateOrderStatus(' + ${order.id} + ', \'PREPARED\')'">Prepare</button>
@@ -48,6 +48,9 @@
 
                                         <span th:if="${order.status == 'DELIVERED'}"
                                             class="text-success small fw-bold">Ready</span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-primary bi bi-printer-fill" th:onclick="'printOrder(' + ${order.id} + ')'">Print</button>
                                     </div>
                                 </td>
                             </tr>
@@ -148,6 +151,25 @@
             } catch (error) {
                 console.error(error);
                 alert('Error loading order details');
+            }
+        }
+
+        async function printOrder(orderId) {
+            try {
+                const response = await fetch(`/delivery/print/${orderId}`, {
+                    method: 'GET'
+                });
+                if (!response.ok) throw new Error('Failed to print order');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `order_${orderId}.pdf`;
+                link.click();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error(error);
+                alert('Error printing order');
             }
         }
     </script>
