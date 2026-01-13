@@ -50,7 +50,8 @@
                                             class="text-success small fw-bold">Ready</span>
                                     </div>
                                     <div>
-                                        <button class="btn btn-sm btn-primary bi bi-printer-fill" th:onclick="'printOrder(' + ${order.id} + ')'">Print</button>
+                                        <button class="btn btn-sm btn-primary bi bi-printer-fill"
+                                            th:onclick="'printOrder(' + ${order.id} + ')'"></button>
                                     </div>
                                 </td>
                             </tr>
@@ -155,6 +156,7 @@
         }
 
         async function printOrder(orderId) {
+            /** update for download link
             try {
                 const response = await fetch(`/delivery/print/${orderId}`, {
                     method: 'GET'
@@ -171,6 +173,8 @@
                 console.error(error);
                 alert('Error printing order');
             }
+            */
+           window.open(`/delivery/print/${orderId}`, '_blank');
         }
     </script>
     <footer th:replace="~{fragments :: footer}"></footer>

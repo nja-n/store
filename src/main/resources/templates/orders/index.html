@@ -13,8 +13,10 @@
             <!-- Create Order Card -->
             <div class="col-md-5">
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
-                    <div class="card-header bg-white border-0 pt-4 pb-1">
+                    <div class="card-header bg-white border-0 pt-4 pb-1 d-flex justify-content-between">
                         <h5 class="fw-bold">Step 1: Select Store & Search Assets</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                            data-bs-toggle="modal" data-bs-target="#store-setup-modal">Add Store</button>
                     </div>
                     <div class="card-body">
                         <!-- Store Selection -->
@@ -167,6 +169,15 @@
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="store-setup-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div th:replace="admin/store-setup-form"></div>
                 </div>
             </div>
         </div>
@@ -352,6 +363,7 @@
             }
         }
     </script>
+
     <footer th:replace="~{fragments :: footer}"></footer>
 </body>
 

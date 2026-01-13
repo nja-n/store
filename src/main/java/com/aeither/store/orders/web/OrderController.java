@@ -2,6 +2,7 @@ package com.aeither.store.orders.web;
 
 import com.aeither.store.administration.application.StoreService;
 import com.aeither.store.administration.application.UserService;
+import com.aeither.store.administration.domain.model.Store;
 import com.aeither.store.administration.domain.model.User;
 import com.aeither.store.common.domain.AuthenticationContext;
 import com.aeither.store.orders.application.OrderService;
@@ -41,6 +42,7 @@ public class OrderController {
                     // .filter(s -> currentUser.getCompany().getId().equals(s.getCompanyId()))
                     .toList());
             model.addAttribute("stocks", stockService.getMyCompanyStocks());
+            model.addAttribute("store", new Store());
         } else {
             model.addAttribute("orders", orderService.findAll());
             model.addAttribute("stores", storeService.findAll());

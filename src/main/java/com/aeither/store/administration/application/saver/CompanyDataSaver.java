@@ -33,7 +33,13 @@ public class CompanyDataSaver implements SetupDataSaver {
         }
 
         company.setName(requestData.get("name"));
-        // Status is handled in Service (default ACTIVE) or existing status preserved
+        company.setGstin(requestData.get("gstin"));
+        company.setAddress(requestData.get("address"));
+        company.setPhone(requestData.get("phone"));
+        company.setEmail(requestData.get("email"));
+        company.setWebsite(requestData.get("website"));
+        company.setLogo(requestData.get("logo"));
+        company.setStatus(requestData.get("status"));
 
         companyService.save(company);
     }

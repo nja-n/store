@@ -35,6 +35,9 @@ public class Order extends AuditableEntity {
     private List<OrderItem> items = new ArrayList<>();
 
     public Date getDueDate() {
+        if (this.date == null) {
+            this.date = new Date();
+        }
         return Date.from(
                 this.date.toInstant()
                         .plus(7, ChronoUnit.DAYS));
