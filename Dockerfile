@@ -1,10 +1,28 @@
-# Stage 1: Build the Spring Boot JAR
-FROM maven:3.8.5-openjdk-25 AS builder
-WORKDIR /store
-COPY store/ .
+# -------- BUILD STAGE --------
+FROM maven:3.9.11-eclipse-temurin-25-alpine AS builder
+WORKDIR /build
+
+# Copy pom and download dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Copy source code
+COPY src ./src
+
+# Build jar
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the JAR
-FROM eclipse-temurin:25-jdk
-COPY --from=builder /store/target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+
+# -------- RUNTIME STAGE --------
+
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+
+# Copy jar from builder
+COPY --from=builder /build/target/*.jar app.jar
+
+# Eureka default port
+EXPOSE 8761
+
+# Run app
+ENTRYPOINT ["java", "-jar", "app.jar"]
