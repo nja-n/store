@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Purchase Management')}"></head>
+
+<body>
+    <header
+        th:replace="~{fragments :: header('Purchase Management', 'Manage incoming inventory and supplier purchases')}">
+    </header>
+
+    <div class="container mb-5">
+        <div class="row">
+            <!-- New Purchase Form -->
+            <div class="col-lg-5 mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-1">
+                        <h5 class="fw-bold">New Purchase</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="purchaseForm">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Supplier Name</label>
+                                <input type="text" class="form-control" id="supplier" required
+                                    placeholder="e.g. Acme Corp">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Notes</label>
+                                <textarea class="form-control" id="notes" rows="2"
+                                    placeholder="Optional notes..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Add Item</label>
+                                <div class="card bg-light border-0 p-3 rounded-3">
+                                    <div class="mb-2">
+                                        <select class="form-select" id="assetSelect">
+                                            <option value="">Select Asset...</option>
+                                            <option th:each="asset : ${assets}" th:value="${asset.id}"
+                                                th:data-name="${asset.name}" th:data-price="${asset.wholesalePrice}"
+                                                th:text="${asset.name}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="itemQty" placeholder="Qty"
+                                                min="1">
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" class="form-control" id="itemPrice"
+                                                    placeholder="Price" step="0.01">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-100 mt-2 btn-sm" onclick="addItem()">
+                                        + Add to List
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Items Table -->
+                            <div class="table-responsive mb-3" style="max-height: 200px; overflow-y: auto;">
+                                <table class="table table-sm align-middle">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th style="width: 50px;">Qty</th>
+                                            <th style="width: 70px;">Total</th>
+                                            <th style="width: 30px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="purchaseItemsBody">
+                                        <!-- Items injected here -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center border-top pt-3 mb-3">
+                                <span class="fw-bold text-muted">Grand Total</span>
+                                <span class="h4 mb-0 fw-bold text-primary" id="grandTotalDisplay">$0.00</span>
+                            </div>
+
+                            <button type="button" class="btn btn-success w-100 py-2 fw-bold" onclick="submitPurchase()">
+                                Complete Purchase
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchase History -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-0 pt-4 pb-1">
+                        <h5 class="fw-bold">Purchase History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Purchase #</th>
+                                        <th>Supplier</th>
+                                        <th>Amount</th>
+                                        <th>Items</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="purchase : ${purchases}">
+                                        <td th:text="${#temporals.format(purchase.createdTime, 'dd MMM yyyy')}">Date
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border"
+                                                th:text="${purchase.purchaseNumber}">PUR-123</span>
+                                        </td>
+                                        <td th:text="${purchase.supplier}">Supplier</td>
+                                        <td class="fw-bold text-success"
+                                            th:text="${'$' + #numbers.formatDecimal(purchase.totalAmount, 1, 2)}">$0.00
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary rounded-pill"
+                                                th:text="${purchase.items != null ? purchase.items.size() : 'N/A'}">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(purchases)}">
+                                        <td colspan="5" class="text-center py-4 text-muted">No purchases found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let items = [];
+
+        // Auto-fill price when asset selected
+        document.getElementById('assetSelect').addEventListener('change', function () {
+            const option = this.options[this.selectedIndex];
+            const price = option.getAttribute('data-price');
+            if (price) {
+                document.getElementById('itemPrice').value = price;
+            }
+        });
+
+        function addItem() {
+            const assetSelect = document.getElementById('assetSelect');
+            const qtyInput = document.getElementById('itemQty');
+            const priceInput = document.getElementById('itemPrice');
+
+            const assetId = assetSelect.value;
+            if (!assetId) {
+                alert("Please select an asset.");
+                return;
+            }
+
+            const qty = parseInt(qtyInput.value);
+            const price = parseFloat(priceInput.value);
+
+            if (!qty || qty <= 0) {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+            if (!price || price < 0) {
+                alert("Please enter a valid price.");
+                return;
+            }
+
+            const assetName = assetSelect.options[assetSelect.selectedIndex].text;
+            const total = qty * price;
+
+            items.push({
+                assetId: parseInt(assetId),
+                assetName: assetName,
+                quantity: qty,
+                price: price,
+                total: total
+            });
+
+            // Reset inputs
+            assetSelect.value = "";
+            qtyInput.value = "";
+            priceInput.value = "";
+
+            renderItems();
+        }
+
+        function renderItems() {
+            const tbody = document.getElementById('purchaseItemsBody');
+            tbody.innerHTML = "";
+
+            let grandTotal = 0;
+
+            items.forEach((item, index) => {
+                grandTotal += item.total;
+                const row = `
+                    <tr>
+                        <td>
+                            <div class="small fw-bold">${item.assetName}</div>
+                            <div class="small text-muted">$${item.price.toFixed(2)}</div>
+                        </td>
+                        <td>${item.quantity}</td>
+                        <td class="fw-bold">$${item.total.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-link text-danger p-0 small" onclick="removeItem(${index})">&times;</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            document.getElementById('grandTotalDisplay').innerText = "$" + grandTotal.toFixed(2);
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            renderItems();
+        }
+
+        async function submitPurchase() {
+            const supplier = document.getElementById('supplier').value;
+            const notes = document.getElementById('notes').value;
+
+            if (!supplier) {
+                alert("Please enter a supplier name.");
+                return;
+            }
+
+            if (items.length === 0) {
+                alert("Please add at least one item.");
+                return;
+            }
+
+            // Calculate grand total from items
+            const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+
+            const request = {
+                supplier: supplier,
+                notes: notes,
+                grandTotal: grandTotal.toString(),
+                items: items
+            };
+
+            try {
+                const response = await fetch('/purchase', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(request)
+                });
+
+                if (response.ok) {
+                    alert("Purchase recorded successfully!");
+                    window.location.reload();
+                } else {
+                    const msg = await response.text();
+                    alert("Error: " + msg);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Network error occurred.");
+            }
+        }
+    </script>
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+
+</html>

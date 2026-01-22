@@ -44,7 +44,7 @@
 
                                         <button th:if="${order.status == 'PREPARED'}"
                                             class="btn btn-sm btn-info text-white"
-                                            th:onclick="'updateOrderStatus(' + ${order.id} + ', \'DELIVERED\')'">Deliver</button>
+                                            th:onclick="'showOrderDetails(' + ${order.id} + ')'">Deliver</button>
 
                                         <span th:if="${order.status == 'DELIVERED'}"
                                             class="text-success small fw-bold">Ready</span>

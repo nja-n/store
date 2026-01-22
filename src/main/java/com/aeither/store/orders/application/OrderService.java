@@ -10,6 +10,7 @@ import com.aeither.store.orders.web.OrderDetailsDTO;
 import com.aeither.store.orders.web.OrderRequestDTO;
 import com.aeither.store.stock.application.StockService;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ public class OrderService {
         return orderRepository.findByCompanyId(companyId);
     }
 
+    @Transactional
     public Order findById(Long id) {
         return orderRepository.findById(id).orElse(null);
     }
@@ -45,7 +47,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public Order placeOrder(OrderRequestDTO request, com.aeither.store.administration.domain.model.Company company) {
         Order order = new Order();
         order.setStore(storeService.findById(request.getStoreId()));
@@ -72,7 +74,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void updateStatus(Long id, String status) {
         Order order = findById(id);
         if (order != null) {

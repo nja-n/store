@@ -21,7 +21,7 @@ public class Order extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "store_id")
     private com.aeither.store.administration.domain.model.Store store;
 
